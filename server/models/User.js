@@ -208,13 +208,7 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  if (!this.isNew) this.passwordChangedAt = Date.now() - 1000;
-  next();
-});
-
-// ── Pre-save: Update lastLogin ────────────────────────────────
-userSchema.pre("save", function (next) {
-  if (this.isModified("lastLogin")) return next();
+  if (!this.isNew) this.passwordChangedAt = new Date(Date.now() - 1000);
   next();
 });
 
