@@ -7,7 +7,7 @@
 <br/><br/>
 
 <h1>
-  <img src="client/public/logo.png" width="30%" alt="logo" />
+  <img src="client/public/logo.png" width="20%" alt="logo" />
   &nbsp;AI Health Assist
 </h1>
 
