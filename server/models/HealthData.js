@@ -195,15 +195,18 @@ healthDataSchema.index({ userId: 1, createdAt: -1 });
 healthDataSchema.index({ userId: 1, "healthScore.overall": -1 });
 
 // ── Pre-save: Auto-calculate BMI ──────────────────────────────
-healthDataSchema.pre("save", function (next) {
+// ── Pre-save: Auto-calculate BMI, categorize BP and Glucose ───
+// Single async hook — no next() parameter needed
+// Mongoose resolves async pre-save hooks via the returned Promise
+healthDataSchema.pre("save", async function () {
+  // Auto-calculate BMI
   if (this.weight?.value && this.height?.value) {
     const heightM = this.height.value / 100;
     const bmi = parseFloat(
       (this.weight.value / (heightM * heightM)).toFixed(1),
     );
-    this.bmi = this.bmi || {};
+    if (!this.bmi) this.bmi = {};
     this.bmi.value = bmi;
-
     if (bmi < 18.5) this.bmi.category = "underweight";
     else if (bmi < 25.0) this.bmi.category = "normal";
     else if (bmi < 30.0) this.bmi.category = "overweight";
@@ -211,13 +214,11 @@ healthDataSchema.pre("save", function (next) {
     else if (bmi < 40.0) this.bmi.category = "obese_class2";
     else this.bmi.category = "obese_class3";
   }
-  next();
-});
 
-// ── Pre-save: Auto-categorize Blood Pressure ──────────────────
-healthDataSchema.pre("save", function (next) {
+  // Auto-categorize Blood Pressure
   if (this.bloodPressure?.systolic && this.bloodPressure?.diastolic) {
-    const { systolic: s, diastolic: d } = this.bloodPressure;
+    const s = this.bloodPressure.systolic;
+    const d = this.bloodPressure.diastolic;
     if (s > 180 || d > 120) this.bloodPressure.category = "hypertensive_crisis";
     else if (s >= 140 || d >= 90) this.bloodPressure.category = "high_stage2";
     else if (s >= 130 || d >= 80) this.bloodPressure.category = "high_stage1";
@@ -225,13 +226,11 @@ healthDataSchema.pre("save", function (next) {
     else if (s < 90 || d < 60) this.bloodPressure.category = "low";
     else this.bloodPressure.category = "normal";
   }
-  next();
-});
 
-// ── Pre-save: Auto-categorize Glucose ─────────────────────────
-healthDataSchema.pre("save", function (next) {
+  // Auto-categorize Glucose
   if (this.glucose?.value) {
-    const { value, mealState } = this.glucose;
+    const value = this.glucose.value;
+    const mealState = this.glucose.mealState;
     if (mealState === "fasting") {
       if (value < 70) this.glucose.category = "hypoglycemia";
       else if (value < 100) this.glucose.category = "normal";
@@ -244,7 +243,6 @@ healthDataSchema.pre("save", function (next) {
       else this.glucose.category = "diabetes";
     }
   }
-  next();
 });
 
 // ── Virtuals ──────────────────────────────────────────────────
