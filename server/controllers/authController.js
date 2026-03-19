@@ -4,29 +4,20 @@ const { sendTokenResponse } = require("../utils/generateToken");
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Register new user
-// @route   POST /api/auth/register
-// @access  Public
-// ─────────────────────────────────────────────────────────────
+// ── Register ──────────────────────────────────────────────────
 const register = asyncHandler(async (req, res, next) => {
   const { name, email, password, age, gender, bloodGroup } = req.body;
 
-  // 1. Validate required fields
-  if (!name || !email || !password) {
+  if (!name || !email || !password)
     return next(new AppError("Name, email and password are required", 400));
-  }
-  if (password.length < 6) {
+  if (password.length < 6)
     return next(new AppError("Password must be at least 6 characters", 400));
-  }
 
-  // 2. Check duplicate email
   const existing = await User.findOne({ email: email.toLowerCase() });
-  if (existing) {
+  if (existing)
     return next(new AppError("An account with this email already exists", 400));
-  }
 
-  // 3. Create user (lastLogin set here avoids a second .save() call)
+  // User.create triggers pre-save → password gets hashed ✅
   const user = await User.create({
     name: name.trim(),
     email: email.toLowerCase().trim(),
@@ -40,65 +31,50 @@ const register = asyncHandler(async (req, res, next) => {
   sendTokenResponse(user, 201, res, "Account created successfully");
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Login user
-// @route   POST /api/auth/login
-// @access  Public
-// ─────────────────────────────────────────────────────────────
+// ── Login ─────────────────────────────────────────────────────
 const login = asyncHandler(async (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
+  if (!email || !password)
     return next(new AppError("Email and password are required", 400));
-  }
 
-  // 1. Find user with password field
   const user = await User.findOne({ email: email.toLowerCase() }).select(
     "+password",
   );
-  if (!user) {
-    return next(new AppError("Invalid email or password", 401));
-  }
+  if (!user) return next(new AppError("Invalid email or password", 401));
 
-  // 2. Check account active
-  if (!user.isActive) {
+  if (!user.isActive)
     return next(new AppError("Account deactivated. Contact support.", 401));
-  }
 
-  // 3. Verify password
   const isMatch = await user.matchPassword(password);
-  if (!isMatch) {
-    return next(new AppError("Invalid email or password", 401));
-  }
+  if (!isMatch) return next(new AppError("Invalid email or password", 401));
 
-  // 4. Update last login using findByIdAndUpdate to bypass pre-save hooks
+  // Use findByIdAndUpdate so pre-save hook is NOT triggered
   await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
   sendTokenResponse(user, 200, res, "Login successful");
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Get current user profile
-// @route   GET /api/auth/profile
-// @access  Private
-// ─────────────────────────────────────────────────────────────
-const getProfile = asyncHandler(async (req, res) => {
+// ── Get Profile ───────────────────────────────────────────────
+const getProfile = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.userId);
-  if (!user) throw new AppError("User not found", 404);
-
-  res.status(200).json({
-    success: true,
-    data: { user: user.toSafeObject() },
-  });
+  if (!user) return next(new AppError("User not found", 404));
+  res.status(200).json({ success: true, data: { user: user.toSafeObject() } });
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Update user profile
-// @route   PUT /api/auth/profile
-// @access  Private
-// ─────────────────────────────────────────────────────────────
+// ── Update Profile ────────────────────────────────────────────
+// Uses findByIdAndUpdate so the password pre-save hook is NEVER triggered
 const updateProfile = asyncHandler(async (req, res, next) => {
-  const forbidden = ["password", "email", "isActive", "isEmailVerified"];
+  // Strip fields that must never be updated this way
+  const forbidden = [
+    "password",
+    "email",
+    "isActive",
+    "isEmailVerified",
+    "passwordChangedAt",
+    "passwordResetToken",
+    "passwordResetExpires",
+  ];
   forbidden.forEach((f) => delete req.body[f]);
 
   const {
@@ -118,28 +94,40 @@ const updateProfile = asyncHandler(async (req, res, next) => {
     settings,
   } = req.body;
 
-  const user = await User.findById(req.userId);
+  // Build update object — only include fields that were actually sent
+  const update = {};
+  if (name) update.name = name.trim();
+  if (age !== undefined) update.age = age;
+  if (gender) update.gender = gender;
+  if (phone) update.phone = phone;
+  if (bloodGroup) update.bloodGroup = bloodGroup;
+  if (dateOfBirth) update.dateOfBirth = dateOfBirth;
+  if (height) update.height = height;
+  if (weight) update.weight = weight;
+  if (allergies) update.allergies = allergies;
+  if (medicalHistory) update.medicalHistory = medicalHistory;
+  if (currentMedications) update.currentMedications = currentMedications;
+  if (emergencyContact) update.emergencyContact = emergencyContact;
+
+  // For nested objects merge via dot-notation to avoid overwriting sibling fields
+  if (lifestyle) {
+    Object.keys(lifestyle).forEach((k) => {
+      update[`lifestyle.${k}`] = lifestyle[k];
+    });
+  }
+  if (settings) {
+    Object.keys(settings).forEach((k) => {
+      update[`settings.${k}`] = settings[k];
+    });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.userId,
+    { $set: update },
+    { new: true, runValidators: true },
+  );
+
   if (!user) return next(new AppError("User not found", 404));
-
-  // Apply updates selectively
-  if (name) user.name = name.trim();
-  if (age !== undefined) user.age = age;
-  if (gender) user.gender = gender;
-  if (phone) user.phone = phone;
-  if (bloodGroup) user.bloodGroup = bloodGroup;
-  if (dateOfBirth) user.dateOfBirth = dateOfBirth;
-  if (height) user.height = height;
-  if (weight) user.weight = weight;
-  if (allergies) user.allergies = allergies;
-  if (medicalHistory) user.medicalHistory = medicalHistory;
-  if (currentMedications) user.currentMedications = currentMedications;
-  if (emergencyContact) user.emergencyContact = emergencyContact;
-  if (lifestyle)
-    user.lifestyle = { ...(user.lifestyle.toObject?.() || {}), ...lifestyle };
-  if (settings)
-    user.settings = { ...(user.settings.toObject?.() || {}), ...settings };
-
-  await user.save();
 
   res.status(200).json({
     success: true,
@@ -148,23 +136,19 @@ const updateProfile = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Upload / update profile picture
-// @route   POST /api/auth/profile/avatar
-// @access  Private
-// ─────────────────────────────────────────────────────────────
+// ── Update Avatar ─────────────────────────────────────────────
 const updateAvatar = asyncHandler(async (req, res, next) => {
   if (!req.file) return next(new AppError("Please upload an image", 400));
 
   const user = await User.findById(req.userId);
   if (!user) return next(new AppError("User not found", 404));
 
-  // Delete old avatar from Cloudinary if exists
+  // Delete old avatar from Cloudinary
   if (user.profilePicPublicId) {
     await cloudinary.uploader.destroy(user.profilePicPublicId).catch(() => {});
   }
 
-  // Upload new avatar via stream
+  // Stream upload new avatar
   const uploadFromBuffer = () =>
     new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
@@ -184,9 +168,11 @@ const updateAvatar = asyncHandler(async (req, res, next) => {
 
   const result = await uploadFromBuffer();
 
-  user.profilePic = result.secure_url;
-  user.profilePicPublicId = result.public_id;
-  await user.save({ validateBeforeSave: false });
+  // Use findByIdAndUpdate — no pre-save hook triggered
+  await User.findByIdAndUpdate(req.userId, {
+    profilePic: result.secure_url,
+    profilePicPublicId: result.public_id,
+  });
 
   res.status(200).json({
     success: true,
@@ -195,22 +181,17 @@ const updateAvatar = asyncHandler(async (req, res, next) => {
   });
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Change password
-// @route   PUT /api/auth/change-password
-// @access  Private
-// ─────────────────────────────────────────────────────────────
+// ── Change Password ───────────────────────────────────────────
+// This IS the one place we intentionally trigger the pre-save hook (to hash)
 const changePassword = asyncHandler(async (req, res, next) => {
   const { currentPassword, newPassword } = req.body;
 
-  if (!currentPassword || !newPassword) {
+  if (!currentPassword || !newPassword)
     return next(new AppError("Current and new password are required", 400));
-  }
-  if (newPassword.length < 6) {
+  if (newPassword.length < 6)
     return next(
       new AppError("New password must be at least 6 characters", 400),
     );
-  }
 
   const user = await User.findById(req.userId).select("+password");
   if (!user) return next(new AppError("User not found", 404));
@@ -218,17 +199,14 @@ const changePassword = asyncHandler(async (req, res, next) => {
   const isMatch = await user.matchPassword(currentPassword);
   if (!isMatch) return next(new AppError("Current password is incorrect", 401));
 
+  // This triggers pre-save to hash the new password ✅
   user.password = newPassword;
   await user.save();
 
   sendTokenResponse(user, 200, res, "Password changed successfully");
 });
 
-// ─────────────────────────────────────────────────────────────
-// @desc    Delete account
-// @route   DELETE /api/auth/account
-// @access  Private
-// ─────────────────────────────────────────────────────────────
+// ── Delete Account ────────────────────────────────────────────
 const deleteAccount = asyncHandler(async (req, res, next) => {
   const { password } = req.body;
   if (!password)
@@ -240,14 +218,12 @@ const deleteAccount = asyncHandler(async (req, res, next) => {
   const isMatch = await user.matchPassword(password);
   if (!isMatch) return next(new AppError("Password incorrect", 401));
 
-  // Soft delete — keep data for 30 days
-  user.isActive = false;
-  await user.save({ validateBeforeSave: false });
+  // Use findByIdAndUpdate — no pre-save hook triggered
+  await User.findByIdAndUpdate(req.userId, { isActive: false });
 
-  res.status(200).json({
-    success: true,
-    message: "Account deactivated successfully",
-  });
+  res
+    .status(200)
+    .json({ success: true, message: "Account deactivated successfully" });
 });
 
 module.exports = {
