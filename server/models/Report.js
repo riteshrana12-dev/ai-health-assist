@@ -226,14 +226,13 @@ reportSchema.virtual("analysisComplete").get(function () {
 });
 
 // ── Pre-save: Set title from fileName ─────────────────────────
-reportSchema.pre("save", function (next) {
+reportSchema.pre("save", async function () {
   if (!this.title && this.fileName) {
     this.title = this.fileName
-      .replace(/\.[^/.]+$/, "") // remove extension
-      .replace(/[-_]/g, " ") // replace dashes/underscores
-      .replace(/\b\w/g, (l) => l.toUpperCase()); // title case
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[-_]/g, " ")
+      .replace(/\b\w/g, (l) => l.toUpperCase());
   }
-  next();
 });
 
 // ── Instance: Increment view count ────────────────────────────
