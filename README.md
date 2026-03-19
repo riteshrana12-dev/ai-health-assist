@@ -68,19 +68,6 @@ Track vitals · Analyze medical reports · Detect risks early · Get personalize
 |:------------:|:----------------:|
 | ![Landing](assets/landing.png) | ![Education](assets/education.png) |
 
-### 🎥 Demo Video
-
-<div align="center">
-
-[![Watch Demo](assets/demo-thumbnail.png)](assets/demo.mp4)
-
-*Click to watch the full demo video*
-
-> 💡 **Tip:** For better visibility, upload your video to YouTube and replace the link above with `[![Watch Demo](assets/demo-thumbnail.png)](https://youtube.com/watch?v=YOUR_VIDEO_ID)`
-
-</div>
-
----
 
 ## 📋 Table of Contents
 
