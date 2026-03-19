@@ -2,12 +2,12 @@
 
 <!-- BANNER IMAGE -->
 <!-- 📸 Place your banner image at: assets/banner.png (recommended: 1280×640px) -->
-<img src="assets/banner.png" alt="AI Health Assist Banner" width="100%" />
+<img src="client/assets/banner.png" alt="AI Health Assist Banner" width="100%" />
 
 <br/><br/>
 
 <h1>
-  <img src="https://raw.githubusercontent.com/riteshrana12-dev/ai-health-assist/client/public/logo.png" width="30" height="30" alt="logo" />
+  <img src="ai-health-assist/client/public/logo.png" width="30" height="30" alt="logo" />
   &nbsp;AI Health Assist
 </h1>
 
@@ -58,15 +58,15 @@ Track vitals · Analyze medical reports · Detect risks early · Get personalize
 
 | Dashboard | AI Chat Assistant |
 |:---------:|:-----------------:|
-| ![Dashboard](assets/dashboard.png) | ![Chat](assets/chat.png) |
+| ![Dashboard](client/assets/dashboard.png) | ![Chat](client/assets/chat.png) |
 
 | Medical Report Analyzer | Health Analytics |
 |:-----------------------:|:----------------:|
-| ![Reports](assets/reports.png) | ![Analytics](assets/analytics.png) |
+| ![Reports](client/assets/reports.png) | ![Analytics](client/assets/analytics.png) |
 
 | Landing Page | Health Education |
 |:------------:|:----------------:|
-| ![Landing](assets/landing.png) | ![Education](assets/education.png) |
+| ![Landing](client/assets/landing.png) | ![Education](client/assets/education.png) |
 
 
 ## 📋 Table of Contents
