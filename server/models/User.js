@@ -3,13 +3,12 @@ const bcrypt = require("bcryptjs");
 
 const userSchema = new mongoose.Schema(
   {
-    // ── Basic Info ──────────────────────────────────────────
     name: {
       type: String,
       required: [true, "Name is required"],
       trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxlength: [50, "Name cannot exceed 50 characters"],
+      minlength: [2, "Min 2 chars"],
+      maxlength: [50, "Max 50 chars"],
     },
     email: {
       type: String,
@@ -22,55 +21,36 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
-      select: false, // never returned in queries by default
+      minlength: [6, "Min 6 chars"],
+      select: false,
     },
-
-    // ── Profile ─────────────────────────────────────────────
-    profilePic: {
-      type: String,
-      default: "",
-    },
-    profilePicPublicId: {
-      type: String,
-      default: "",
-    },
-    dateOfBirth: {
-      type: Date,
-    },
+    profilePic: { type: String, default: "" },
+    profilePicPublicId: { type: String, default: "" },
+    dateOfBirth: { type: Date },
     age: {
       type: Number,
       min: [0, "Age cannot be negative"],
-      max: [150, "Age seems too high"],
+      max: [150, "Age too high"],
     },
     gender: {
       type: String,
       enum: ["male", "female", "other", "prefer_not_to_say"],
     },
-    phone: {
-      type: String,
-      trim: true,
-      match: [/^\+?[\d\s\-()]{7,15}$/, "Please provide a valid phone number"],
-    },
-
-    // ── Medical Profile ─────────────────────────────────────
+    phone: { type: String, trim: true },
     bloodGroup: {
       type: String,
       enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "unknown"],
       default: "unknown",
     },
     height: {
-      value: { type: Number, min: 0, max: 300 }, // cm
+      value: { type: Number, min: 0, max: 300 },
       unit: { type: String, enum: ["cm", "ft"], default: "cm" },
     },
     weight: {
-      value: { type: Number, min: 0, max: 700 }, // kg
+      value: { type: Number, min: 0, max: 700 },
       unit: { type: String, enum: ["kg", "lbs"], default: "kg" },
     },
-    allergies: {
-      type: [String],
-      default: [],
-    },
+    allergies: { type: [String], default: [] },
     medicalHistory: [
       {
         condition: { type: String, trim: true },
@@ -83,17 +63,12 @@ const userSchema = new mongoose.Schema(
         notes: { type: String, trim: true },
       },
     ],
-    currentMedications: {
-      type: [String],
-      default: [],
-    },
+    currentMedications: { type: [String], default: [] },
     emergencyContact: {
       name: { type: String, trim: true },
       relationship: { type: String, trim: true },
       phone: { type: String, trim: true },
     },
-
-    // ── Lifestyle ────────────────────────────────────────────
     lifestyle: {
       smokingStatus: {
         type: String,
@@ -122,14 +97,8 @@ const userSchema = new mongoose.Schema(
         enum: ["omnivore", "vegetarian", "vegan", "keto", "other", "unknown"],
         default: "unknown",
       },
-      sleepHours: {
-        type: Number,
-        min: 0,
-        max: 24,
-      },
+      sleepHours: { type: Number, min: 0, max: 24 },
     },
-
-    // ── App Settings ─────────────────────────────────────────
     settings: {
       theme: {
         type: String,
@@ -152,45 +121,37 @@ const userSchema = new mongoose.Schema(
         glucose: { type: String, enum: ["mg/dL", "mmol/L"], default: "mg/dL" },
       },
     },
-
-    // ── Auth & Security ──────────────────────────────────────
     isEmailVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     lastLogin: { type: Date },
-    passwordChangedAt: { type: Date },
+    passwordChangedAt: { type: Date, select: false },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
-
-    // ── Computed / Cached ────────────────────────────────────
     latestHealthScore: { type: Number, min: 0, max: 100 },
     latestBMI: { type: Number },
     totalReports: { type: Number, default: 0 },
   },
   {
-    timestamps: true, // createdAt, updatedAt
+    timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
   },
 );
 
-// ── Indexes ───────────────────────────────────────────────────
 userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ isActive: 1 });
 
-// ── Virtuals ──────────────────────────────────────────────────
 userSchema.virtual("fullName").get(function () {
   return this.name;
 });
-
 userSchema.virtual("bmi").get(function () {
   if (this.height?.value && this.weight?.value) {
-    const heightM = this.height.value / 100;
-    return parseFloat((this.weight.value / (heightM * heightM)).toFixed(1));
+    const h = this.height.value / 100;
+    return parseFloat((this.weight.value / (h * h)).toFixed(1));
   }
   return null;
 });
-
 userSchema.virtual("ageFromDOB").get(function () {
   if (this.dateOfBirth) {
     const today = new Date();
@@ -203,16 +164,19 @@ userSchema.virtual("ageFromDOB").get(function () {
   return this.age || null;
 });
 
-// ── Pre-save: Hash Password ───────────────────────────────────
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+// KEY FIX: async pre-save with NO next() parameter
+// Mongoose resolves async pre-save hooks automatically when they return a Promise
+// Using next() in an async hook causes "next is not a function" when Mongoose
+// passes a different internal callback in certain versions
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
-  if (!this.isNew) this.passwordChangedAt = new Date(Date.now() - 1000);
-  next();
+  if (!this.isNew) {
+    this.passwordChangedAt = new Date(Date.now() - 1000);
+  }
 });
 
-// ── Instance Methods ──────────────────────────────────────────
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
@@ -233,11 +197,11 @@ userSchema.methods.toSafeObject = function () {
   delete obj.password;
   delete obj.passwordResetToken;
   delete obj.passwordResetExpires;
+  delete obj.passwordChangedAt;
   delete obj.__v;
   return obj;
 };
 
-// ── Static Methods ────────────────────────────────────────────
 userSchema.statics.findByEmail = function (email) {
   return this.findOne({ email: email.toLowerCase() });
 };
