@@ -270,23 +270,17 @@ medicationSchema.virtual("needsRefill").get(function () {
   );
 });
 
-// ── Pre-save: Calculate adherence rate ───────────────────────
-medicationSchema.pre("save", function (next) {
+// ── Pre-save: Calculate adherence rate + set isOngoing ────────
+medicationSchema.pre("save", async function () {
   if (this.adherenceLogs && this.adherenceLogs.length > 0) {
     const taken = this.adherenceLogs.filter(
       (l) => l.status === "taken" || l.status === "late",
     ).length;
     this.adherenceRate = Math.round((taken / this.adherenceLogs.length) * 100);
   }
-  next();
-});
-
-// ── Pre-save: Auto set isOngoing ──────────────────────────────
-medicationSchema.pre("save", function (next) {
   if (!this.endDate && this.duration?.unit === "ongoing") {
     this.isOngoing = true;
   }
-  next();
 });
 
 // ── Instance: Log adherence ───────────────────────────────────
