@@ -7,7 +7,7 @@
 <br/><br/>
 
 <h1>
-  <img src="https://raw.githubusercontent.com/riteshrana12-dev/ai-health-assist/main/client/public/favicon.svg" width="30" height="30" alt="logo" />
+  <img src="https://raw.githubusercontent.com/riteshrana12-dev/ai-health-assist/client/public/logo.png" width="30" height="30" alt="logo" />
   &nbsp;AI Health Assist
 </h1>
 
@@ -55,26 +55,6 @@ Track vitals · Analyze medical reports · Detect risks early · Get personalize
 ---
 
 ## 📸 Screenshots
-
-> **How to add your screenshots:**
-> 1. Create an `assets/` folder at the root of your repo
-> 2. Drop your screenshots in — name them as shown below
-> 3. Add your demo video as `assets/demo.mp4`
-> 4. GitHub will render them automatically
-
-```
-ai-health-assist/
-└── assets/
-    ├── banner.png          ← Hero banner (1280×640px recommended)
-    ├── dashboard.png       ← Dashboard screenshot
-    ├── chat.png            ← AI Chat screenshot
-    ├── reports.png         ← Upload Reports screenshot
-    ├── analytics.png       ← Analytics screenshot
-    ├── landing.png         ← Landing page screenshot
-    ├── education.png       ← Health Education screenshot
-    ├── demo-thumbnail.png  ← Video thumbnail
-    └── demo.mp4            ← Demo video
-```
 
 | Dashboard | AI Chat Assistant |
 |:---------:|:-----------------:|
