@@ -325,8 +325,8 @@ body {
   /* --- Sidebar item --- */
   .nav-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl
-           text-gray-400 hover:text-white hover:bg-white/8
-           font-medium text-sm transition-all duration-200 cursor-pointer;
+         text-gray-400 hover:text-white hover:bg-white/10
+         font-medium text-sm transition-all duration-200 cursor-pointer;
   }
   .nav-item.active {
     @apply bg-brand-500/15 text-brand-400;
@@ -359,13 +359,13 @@ body {
     @apply bg-brand-500 text-white rounded-2xl rounded-br-sm px-4 py-3 max-w-xs lg:max-w-md;
   }
   .bubble-ai {
-    @apply bg-dark-100 border border-white/8 text-gray-200 
-           rounded-2xl rounded-bl-sm px-4 py-3 max-w-xs lg:max-w-md;
+    @apply bg-dark-100 border border-white/10 text-gray-200 
+         rounded-2xl rounded-bl-sm px-4 py-3 max-w-xs lg:max-w-md;
   }
 
   /* --- Progress Bar --- */
   .progress-bar {
-    @apply h-2 rounded-full overflow-hidden bg-white/8;
+    @apply h-2 rounded-full overflow-hidden bg-white/10;
   }
   .progress-fill {
     @apply h-full rounded-full transition-all duration-700 ease-out;
@@ -407,7 +407,7 @@ body {
     @apply px-4 py-3 text-gray-200;
   }
   .data-table tr {
-    @apply border-b border-white/5 hover:bg-white/3 transition-colors;
+    @apply border-b border-white/5 hover:bg-white/5 transition-colors;
   }
 }
 
