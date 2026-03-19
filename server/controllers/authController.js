@@ -26,7 +26,7 @@ const register = asyncHandler(async (req, res, next) => {
     return next(new AppError("An account with this email already exists", 400));
   }
 
-  // 3. Create user
+  // 3. Create user (lastLogin set here avoids a second .save() call)
   const user = await User.create({
     name: name.trim(),
     email: email.toLowerCase().trim(),
@@ -34,11 +34,8 @@ const register = asyncHandler(async (req, res, next) => {
     age: age || undefined,
     gender: gender || undefined,
     bloodGroup: bloodGroup || "unknown",
+    lastLogin: new Date(),
   });
-
-  // 4. Update last login
-  user.lastLogin = new Date();
-  await user.save({ validateBeforeSave: false });
 
   sendTokenResponse(user, 201, res, "Account created successfully");
 });
@@ -74,9 +71,8 @@ const login = asyncHandler(async (req, res, next) => {
     return next(new AppError("Invalid email or password", 401));
   }
 
-  // 4. Update last login
-  user.lastLogin = new Date();
-  await user.save({ validateBeforeSave: false });
+  // 4. Update last login using findByIdAndUpdate to bypass pre-save hooks
+  await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
   sendTokenResponse(user, 200, res, "Login successful");
 });
