@@ -529,7 +529,7 @@ npm run dev
 
 ```env
 # ── Server ────────────────────────────────────
-PORT=5000
+PORT=10000
 NODE_ENV=development
 
 # ── MongoDB Atlas ─────────────────────────────
@@ -553,7 +553,7 @@ CLOUDINARY_API_KEY=123456789012345
 CLOUDINARY_API_SECRET=your_api_secret_here
 
 # ── CORS ──────────────────────────────────────
-CLIENT_URL=http://localhost:5173
+CLIENT_URL= DEPLOYED_ON_VERCEL
 
 # ── Rate Limiting (optional) ──────────────────
 RATE_LIMIT_WINDOW_MS=900000
@@ -563,7 +563,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 ### Client — `client/.env`
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL= BACKEND_DEPLOYED_ON_RENDER
 VITE_APP_NAME=AI Health Assist
 ```
 
