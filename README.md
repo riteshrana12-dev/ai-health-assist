@@ -7,8 +7,7 @@
 <br/><br/>
 
 <h1>
-  <img src="client/public/logo.png" width="10%"  alt="logo" />
-  &nbsp;AI Health Assist
+  <img src="client/public/logo.png" width="50%"   alt="logo" />
 </h1>
 
 <p><strong>Your intelligent, AI-powered personal health companion</strong><br/>
