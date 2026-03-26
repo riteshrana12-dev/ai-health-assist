@@ -2,12 +2,12 @@
 
 <!-- BANNER IMAGE -->
 <!-- 📸 Place your banner image at: assets/banner.png (recommended: 1280×640px) -->
-<img src="assets/banner.png" alt="AI Health Assist Banner" width="100%" />
+<img src="client/src/assets/banner.png" alt="AI Health Assist Banner" width="100%" />
 
 <br/><br/>
 
 <h1>
-  <img src="https://raw.githubusercontent.com/riteshrana12-dev/ai-health-assist/main/client/public/favicon.svg" width="30" height="30" alt="logo" />
+  <img src="client/public/logo.png" width="30" height="30" alt="logo" />
   &nbsp;AI Health Assist
 </h1>
 
@@ -54,51 +54,17 @@ Track vitals · Analyze medical reports · Detect risks early · Get personalize
 
 ---
 
-## 📸 Screenshots
-
-> **How to add your screenshots:**
-> 1. Create an `assets/` folder at the root of your repo
-> 2. Drop your screenshots in — name them as shown below
-> 3. Add your demo video as `assets/demo.mp4`
-> 4. GitHub will render them automatically
-
-```
-ai-health-assist/
-└── assets/
-    ├── banner.png          ← Hero banner (1280×640px recommended)
-    ├── dashboard.png       ← Dashboard screenshot
-    ├── chat.png            ← AI Chat screenshot
-    ├── reports.png         ← Upload Reports screenshot
-    ├── analytics.png       ← Analytics screenshot
-    ├── landing.png         ← Landing page screenshot
-    ├── education.png       ← Health Education screenshot
-    ├── demo-thumbnail.png  ← Video thumbnail
-    └── demo.mp4            ← Demo video
-```
-
 | Dashboard | AI Chat Assistant |
 |:---------:|:-----------------:|
-| ![Dashboard](assets/dashboard.png) | ![Chat](assets/chat.png) |
+| ![Dashboard](client/src/assets/dashboard.png) | ![Chat](client/src/assets/chat.png) |
 
 | Medical Report Analyzer | Health Analytics |
 |:-----------------------:|:----------------:|
-| ![Reports](assets/reports.png) | ![Analytics](assets/analytics.png) |
+| ![Reports](client/src/assets/reports.png) | ![Analytics](client/src/assets/analytics.png) |
 
 | Landing Page | Health Education |
 |:------------:|:----------------:|
-| ![Landing](assets/landing.png) | ![Education](assets/education.png) |
-
-### 🎥 Demo Video
-
-<div align="center">
-
-[![Watch Demo](assets/demo-thumbnail.png)](assets/demo.mp4)
-
-*Click to watch the full demo video*
-
-> 💡 **Tip:** For better visibility, upload your video to YouTube and replace the link above with `[![Watch Demo](assets/demo-thumbnail.png)](https://youtube.com/watch?v=YOUR_VIDEO_ID)`
-
-</div>
+| ![Landing](client/src/assets/landing.png) | ![Education](client/src/assets/education.png) |
 
 ---
 
