@@ -137,7 +137,35 @@ Track vitals · Analyze medical reports · Detect risks early · Get personalize
 
 ## 🏗️ Architecture
 
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/9d7b1920-20ee-43ce-af84-e8bd9db497c8" />
+<img width="1024" height="559" alt="┌──────────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                               │
+│         React 18 + Vite 5 + Tailwind CSS + Framer Motion         │
+│                                                                   │
+│  Landing  Login  Dashboard  Chat  Reports  Analytics  Profile     │
+│  Signup   HealthEducation   Medications                           │
+└─────────────────────────┬────────────────────────────────────────┘
+                          │  HTTPS  /  JWT Bearer Token
+┌─────────────────────────▼────────────────────────────────────────┐
+│              API GATEWAY  —  Express.js + JWT Middleware          │
+│        Helmet  ·  CORS  ·  Rate Limiting  ·  Morgan Logger       │
+└──────┬────────────┬────────────┬──────────────┬──────────────────┘
+       │            │            │              │
+  ┌────▼───┐  ┌────▼────┐  ┌───▼────┐   ┌────▼──────────┐
+  │  Auth  │  │ Health  │  │  AI    │   │ Reports  Meds │
+  │  Svc   │  │  Data   │  │  Chat  │   │ Controllers   │
+  └────┬───┘  └────┬────┘  └───┬────┘   └────┬──────────┘
+       │            │            │              │
+┌──────▼────────────▼────────────▼──────────────▼──────────────────┐
+│                    DATA  &  SERVICES  LAYER                        │
+├──────────────────┬─────────────────────┬────────────────────────┤
+│   MongoDB Atlas  │   Google Gemini AI  │    Cloudinary CDN      │
+│  User · Health   │   Chatbot · Analyze │  PDF + Image Storage   │
+│  Report · Meds   │   Risk · Explain    │  Avatar Uploads        │
+└──────────────────┴─────────────────────┴────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+│                        DEPLOYMENT                                  │
+│     Vercel (Frontend)  ·  Render (Backend)  ·  Atlas (Database)  │
+└──────────────────────────────────────────────────────────────────┘" src="https://github.com/user-attachments/assets/9d7b1920-20ee-43ce-af84-e8bd9db497c8" />
 
 ---
 
